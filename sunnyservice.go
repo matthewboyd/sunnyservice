@@ -1,4 +1,4 @@
-package sunnyservice
+package main
 
 import (
 	"context"
@@ -7,9 +7,12 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v4/pgxpool" //for sql
+	pb "github.com/matthewboyd/sunnyservice/pb"
+	"google.golang.org/grpc"
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -72,7 +75,12 @@ type Weather struct {
 	Cod      int    `json:"cod"`
 }
 
-func (h *Handler) GetSunnyActivity(ctx context.Context) string {
+type server struct {
+	pb.UnimplementedSunnyServiceServer
+	Handler
+}
+
+func (h *server) GetSunnyActivities(ctx context.Context, in *pb.GetSunnyActivitiesParams) (*pb.Activity, error) {
 	var activityList []Activities
 	var a Activities
 
@@ -94,10 +102,10 @@ func (h *Handler) GetSunnyActivity(ctx context.Context) string {
 	}
 	var discardedActivityList []Activities
 	choosenActivity, _ := h.retrieveActivity(ctx, activityList, discardedActivityList, true, 0)
-	return fmt.Sprintf("%s %s", choosenActivity.Name, choosenActivity.Postcode)
+	return &pb.Activity{choosenActivity.Name, choosenActivity.Postcode}, nil
 }
 
-func (h *Handler) retrieveActivity(ctx context.Context, newActivityList []Activities, discardedActivityList []Activities, sunny bool, tries int) (Activities, error) {
+func (h *server) retrieveActivity(ctx context.Context, newActivityList []Activities, discardedActivityList []Activities, sunny bool, tries int) (Activities, error) {
 	if tries > 3 {
 		return Activities{}, errors.New("we're having difficulties finding a sunny activity, why not try an allWeather activity")
 	}
@@ -161,6 +169,19 @@ func (a *Activities) GetWeather() string {
 	return weather.Weather[0].Main
 }
 
-func (h *Handler) RemoveIndex(s []Activities, index int) []Activities {
+func (h *server) RemoveIndex(s []Activities, index int) []Activities {
 	return append(s[:index], s[index+1:]...)
+}
+
+func main() {
+	lis, err := net.Listen("tcp", ":6666")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	s := grpc.NewServer()
+	pb.RegisterSunnyServiceServer(s, &server{})
+	log.Printf("server listening at %v", lis.Addr())
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }
