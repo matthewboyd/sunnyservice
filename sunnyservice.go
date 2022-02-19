@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v4/pgxpool" //for sql
-	"github.com/sony/gobreaker"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -23,10 +22,9 @@ type Activities struct {
 }
 
 type Handler struct {
-	Logger         log.Logger
-	Db             pgxpool.Pool
-	Redis          redis.Client
-	CircuitBreaker *gobreaker.CircuitBreaker
+	Logger log.Logger
+	Db     pgxpool.Pool
+	Redis  redis.Client
 }
 
 type Weather struct {
@@ -74,7 +72,7 @@ type Weather struct {
 	Cod      int    `json:"cod"`
 }
 
-func (h *Handler) getSunnyActivity(ctx context.Context) string {
+func (h *Handler) GetSunnyActivity(ctx context.Context) string {
 	var activityList []Activities
 	var a Activities
 
