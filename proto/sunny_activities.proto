@@ -1,0 +1,13 @@
+syntax = "proto3";
+option go_package = ".;proto";
+package template;
+
+service SunnyService{
+  rpc GetSunnyActivities(GetSunnyActivitiesParams) returns (Activity) {};
+}
+
+message GetSunnyActivitiesParams {}
+message Activity {
+  string name_of_activity = 1;
+  string postcode = 2;
+}
