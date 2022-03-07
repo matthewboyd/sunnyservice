@@ -54,6 +54,9 @@ github.com/jackc/pgx/v4/pgxpool
 github.com/jackc/puddle
 # github.com/lib/pq v1.10.4
 ## explicit; go 1.13
+# github.com/matthewboyd/models v0.0.0-20220307172127-aa48c4d5f620
+## explicit; go 1.17
+github.com/matthewboyd/models
 # github.com/pkg/errors v0.9.1
 ## explicit
 # golang.org/x/crypto v0.0.0-20220131195533-30dcbda58838

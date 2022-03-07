@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/jackc/pgx/v4 v4.15.0
+	github.com/matthewboyd/models v0.0.0-20220307172127-aa48c4d5f620
 	google.golang.org/grpc v1.44.0
 )
 
